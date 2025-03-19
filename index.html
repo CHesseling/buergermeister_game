@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bürgermeister-Simulator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --text-color: #333;
+            --light-bg: #ecf0f1;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-bg);
+        }
+        
+        header h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .dashboard {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .round-info {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            color: var(--primary-color);
+            padding: 10px;
+            background-color: rgba(52, 152, 219, 0.1);
+            border-radius: 8px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: var(--light-bg);
+            border-radius: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .stat {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            padding: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .stat:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background-color: white;
+            border-radius: 8px;
+        }
+        
+        .stat-icon {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+            color: var(--accent-color);
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+        
+        .stat-value {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .stat-trend {
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+        
+        .trend-up {
+            color: var(--success-color);
+        }
+        
+        .trend-down {
+            color: var(--danger-color);
+        }
+        
+        .progress-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .progress-bar {
+            height: 12px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: var(--accent-color);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .goal-progress {
+            background-color: var(--success-color);
+        }
+        
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .action-category {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .action-category h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--light-bg);
+            padding-bottom: 10px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+        }
+        
+        .action-category h3 i {
+            margin-right: 10px;
+        }
+        
+        .action-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            text-align: left;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+        }
+        
+        .action-button:hover {
+            background-color: var(--accent-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .action-button:disabled {
+            background-color: #e0e0e0;
+            color: #a0a0a0;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .action-button .action-effect {
+            position: absolute;
+            right: 12px;
+            font-weight: bold;
+        }
+        
+        .action-button .positive-effect {
+            color: var(--success-color);
+        }
+        
+        .action-button .negative-effect {
+            color: var(--danger-color);
+        }
+        
+        .action-button:hover .positive-effect,
+        .action-button:hover .negative-effect {
+            color: white;
+        }
+        
+        .next-round-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .next-round-button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        
+        .next-round-button:disabled {
+            background-color: #e0e0e0;
+            color: #a0a0a0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .events-timeline {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .events-timeline h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--light-bg);
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .events-timeline h3 i {
+            margin-right: 10px;
+        }
+        
+        .events-container {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .event-item {
+            position: relative;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: var(--light-bg);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+            transition: all 0.3s ease;
+        }
+        
+        .event-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        
+        .event-item.positive {
+            border-left-color: var(--success-color);
+        }
+        
+        .event-item.negative {
+            border-left-color: var(--danger-color);
+        }
+        
+        .event-item.neutral {
+            border-left-color: var(--accent-color);
+        }
+        
+        .event-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .event-name {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .event-round {
+            font-size: 0.8em;
+            color: var(--secondary-color);
+        }
+        
+        .event-effects {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .event-effect {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .effect-budget-positive {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--success-color);
+        }
+        
+        .effect-budget-negative {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: var(--danger-color);
+        }
+        
+        .effect-satisfaction {
+            background-color: rgba(52, 152, 219, 0.2);
+            color: var(--accent-color);
+        }
+        
+        .effect-jobs {
+            background-color: rgba(243, 156, 18, 0.2);
+            color: var(--warning-color);
+        }
+        
+        .game-over {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .game-over-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+        }
+        
+        .game-over-content h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .game-over-message {
+            margin-bottom: 30px;
+            font-size: 1.2em;
+            line-height: 1.6;
+        }
+        
+        .restart-button {
+            padding: 15px 30px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .restart-button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--secondary-color);
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9em;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--secondary-color) transparent transparent transparent;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @media (max-width: 768px) {
+            .actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat {
+                min-width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Bürgermeister-Simulator</h1>
+            <p>Rette die Finanzen deiner Stadt und halte die Bürger zufrieden!</p>
+        </header>
+
+        <div class="dashboard">
+            <div class="round-info" id="round-info">
+                <i class="fas fa-calendar-alt"></i> Runde <span id="current-round">1</span> von <span id="max-rounds">10</span>
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-icon"><i class="fas fa-euro-sign"></i></div>
+                    <div class="stat-label">Haushalt</div>
+                    <div class="stat-value" id="budget">-500.000 €</div>
+                    <div class="stat-trend" id="budget-trend"></div>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                    <div class="stat-label">Schulden</div>
+                    <div class="stat-value" id="debt">2.000.000 €</div>
+                    <div class="stat-trend" id="debt-trend"></div>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon"><i class="fas fa-smile"></i></div>
+                    <div class="stat-label">Zufriedenheit</div>
+                    <div class="stat-value" id="satisfaction">75%</div>
+                    <div class="stat-trend" id="satisfaction-trend"></div>
+                </div>
+                <div class="stat">
+                    <div class="stat-icon"><i class="fas fa-briefcase"></i></div>
+                    <div class="stat-label">Arbeitsplätze</div>
+                    <div class="stat-value" id="jobs">2000</div>
+                    <div class="stat-trend" id="jobs-trend"></div>
+                </div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-label">
+                    <span>Fortschritt zum ausgeglichenen Haushalt</span>
+                    <span id="budget-goal-percent">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="budget-progress" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-label">
+                    <span>Schuldenabbau</span>
+                    <span id="debt-reduction-percent">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill goal-progress" id="debt-progress" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <div class="action-category">
+                    <h3><i class="fas fa-cut"></i> Ausgaben reduzieren</h3>
+                    <button class="action-button" id="close-library">
+                        Bücherei schließen
+                        <span class="action-effect positive-effect">+50.000 € / Runde</span>
+                        <div class="tooltip"><i class="fas fa-info-circle"></i>
+                            <span class="tooltiptext">Die Stadtbücherei zu schließen spart Geld, aber verärgert Bürger und Bildungseinrichtungen.</span>
+                        </div>
+                    </button>
+                    <button class="action-button" id="close-pool">
+                        Freibad schließen
+                        <span class="action-effect positive-effect">+80.000 € / Runde</span>
+                        <div class="tooltip"><i class="fas fa-info-circle"></i>
+                            <span class="tooltiptext">Das Freibad ist beliebt, aber kostspielig im Unterhalt. Schließung spart Geld, reduziert aber die Zufriedenheit stark.</span>
+                        </div>
+                    </button>
+                    <button class="action-button" id="close-youth">
+                        Jugendtreff schließen
+                        <span class="action-effect positive-effect">+30.000 € / Runde</span>
+                        <div class="tooltip"><i class="fas fa-info-circle"></i>
+                            <span class="tooltiptext">Der Jugendtreff ist wichtig für soziale Integration, aber verursacht laufende Kosten.</span>
+                        </div>
+                    </button>
+                    <button class="action-button" id="reduce-staff">
+                        Personalkosten senken
+                        <span class="action-effect positive-effect">+100.000 € / Runde</span>
+                        <div class="tooltip"><i class="fas fa-info-circle"></i>
+                            <span class="tooltiptext">Personalabbau spart Geld, kostet aber Arbeitsplätze und reduziert die Zufriedenheit.</span>
+                        </div>
+                    </button>
+                </div>
+                
+                <div class="action-category">
+                    <h3><i class="fas fa-coins"></i> Einnahmen erhöhen</h3>
+                    <button class="action-button" id="increase-property-tax">
+                        Grundsteuer erhöhen
+                        <span class="action-effect positive-effect">+60.000 € / Runde</span>
+                        <div class="tooltip"><i class="fas fa-info-circle"></i>
+                            <span class="tooltiptext">Höhere Grundsteuer bedeutet mehr Einnahmen, aber geringere Zufriedenheit bei den Bürgern.</span>
+                        </div>
+                    </button>
+                    <button class="action-button" id="increase-business-tax">
+                        Gewerbesteuer erhöhen
+                        <span class="action-effect positive-effect">+100.000 € / Runde</span>
+                        <div class="tooltip"><i class="fas fa-info-circle"></i>
+                            <span class="tooltiptext">Höhere Gewerbesteuer bringt mehr Einnahmen, könnte aber Unternehmen vertreiben und Arbeitsplätze kosten.</span>
+                        </div>
+                    </button>
+                    <button class="action-button" id="increase-parking">
+                        Parkgebühren erhöhen
+                        <span class="action-effect positive-effect">+20.000 € / Runde</span>
+                        <div class="tooltip"><i class="fas fa-info-circle"></i>
+                            <span class="tooltiptext">Parkgebühren sind unbeliebt, bringen aber regelmäßige Einnahmen.</span>
+                        </div>
+                    </button>
+                    <button class="action-button" id="sell-property">
+                        Städtisches Grundstück verkaufen
+                        <span class="action-effect positive-effect">+200.000 € (einmalig)</span>
+                        <div class="tooltip"><i class="fas fa-info-circle"></i>
+                            <span class="tooltiptext">Bringt sofort Geld, reduziert aber künftige Entwicklungsmöglichkeiten und potenzielle Arbeitsplätze.</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <button class="next-round-button" id="next-round">
+                <i class="fas fa-arrow-right"></i> Nächste Runde starten
+            </button>
+
+            <div class="events-timeline">
+                <h3><i class="fas fa-newspaper"></i> Ereignisse & Nachrichten</h3>
+                <div class="events-container" id="events">
+                    <div class="event-item neutral">
+                        <div class="event-title">
+                            <span class="event-name">Willkommen im Amt</span>
+                            <span class="event-round">Runde 0</span>
+                        </div>
+                        <div class="event-description">
+                            Willkommen Herr/Frau Bürgermeister:in! Die finanzielle Lage unserer Stadt ist kritisch.
+                            Das Bundesland droht mit einer Haushaltsaufsicht, wenn wir die Finanzen nicht in Ordnung bringen.
+                            Sie haben 10 Runden Zeit, einen ausgeglichenen Haushalt zu schaffen oder die Schulden deutlich zu reduzieren.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-over" style="display: none;">
+        <div class="game-over-content">
+            <h2>Spiel beendet!</h2>
+            <p id="game-over-message" class="game-over-message"></p>
+            <div id="final-stats" class="final-stats"></div>
+            <button class="restart-button" id="restart-game">Neues Spiel starten</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
